@@ -19,7 +19,7 @@ Scripts are written on pure Python, so, you need only clone the repository into 
 * ```extract_spherical_harmonics``` Convert the piece of texture into 27 (```9 x 3```) coefficients, which encode the corresponding spherical harmonics
 * ```render_spherical_harmonics``` Convert spherical harmonics coefficients into image
 
-Module ```OIIO_Py2Processor.pyd``` required several external libraries (OpenImageIO, OpenImageDenoise and their dependencies). These libraries and corresponding headers can be download from release section. The folder structure should be as follows:
+Module ```OIIO_Py2Processor.pyd``` required several external libraries (OpenImageIO, OpenImageDenoise and their dependencies). These libraries and corresponding headers can be download from [release section](https://github.com/Tugcga/xsiToPlaycanvas/releases/download/bin.1.0/dst.zip). The folder structure should be as follows:
 ```
 xsiToPlaycanvas/
 ├─ Application/
