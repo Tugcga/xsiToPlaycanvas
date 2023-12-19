@@ -1,0 +1,9 @@
+*.xml
+*.pyc
+*.dll
+.vs
+*.user
+*.filters
+x64
+dst
+process_scripts.py
