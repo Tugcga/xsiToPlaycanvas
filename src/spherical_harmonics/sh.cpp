@@ -1,5 +1,6 @@
 #include <cmath>
 #include <vector>
+#include "../utilities/utilities.h"
 
 float x_to_phi(int x, int width)
 {
@@ -109,12 +110,11 @@ float eval_sh(int l, int m, float phi, float theta)
     return eval_sh(l, m, x, y, z);
 }
 
-std::vector<float> image_to_sh(const std::vector<float>& image_pixels, size_t width, size_t height, size_t channels, float gamma)
+std::vector<float> image_to_sh(const std::vector<float>& image_pixels, size_t width, size_t height, size_t channels, bool apply_srgb)
 {
     std::vector<float> to_return(3 * 9);
 
     float pixel_area = (2.0 * M_PI / width) * (M_PI / height);
-    float gamma_inv = 1.0f / gamma;
 
     // iterate throw pixels
     for (size_t y = 0; y < height; y++)
@@ -127,9 +127,14 @@ std::vector<float> image_to_sh(const std::vector<float>& image_pixels, size_t wi
             float phi = x_to_phi(x, width);
 
             // get pixels
-            float r = pow(image_pixels[channels * (y * width + x)], gamma_inv);
-            float g = pow(image_pixels[channels * (y * width + x) + 1], gamma_inv);
-            float b = pow(image_pixels[channels * (y * width + x) + 2], gamma_inv);
+            float r = image_pixels[channels * (y * width + x)];
+            float g = image_pixels[channels * (y * width + x) + 1];
+            float b = image_pixels[channels * (y * width + x) + 2];
+            if (apply_srgb) {
+                r = linear_to_srgb(r);
+                g = linear_to_srgb(g);
+                b = linear_to_srgb(b);
+            }
 
             for (int l = 0; l <= 2; l++)
             {

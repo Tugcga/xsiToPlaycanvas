@@ -143,7 +143,7 @@ void denoise(std::string noised_path, std::string output_path)
 
 
 
-std::vector<float> extract_spherical_harmonics(std::string image_path, size_t min_x, size_t min_y, size_t width, size_t height, float gamma)
+std::vector<float> extract_spherical_harmonics(std::string image_path, size_t min_x, size_t min_y, size_t width, size_t height, bool apply_srgb)
 {
     OIIO::ImageBuf input_img(image_path);
     OIIO::ImageSpec input_spec(input_img.spec());
@@ -153,7 +153,7 @@ std::vector<float> extract_spherical_harmonics(std::string image_path, size_t mi
     input_img.get_pixels(extract_roi, OIIO::TypeDesc::FLOAT, extract_pixels.data());
     // read the image from top to bottom (and from left to right)
 
-    return image_to_sh(extract_pixels, width, height, input_spec.nchannels, gamma);
+    return image_to_sh(extract_pixels, width, height, input_spec.nchannels, apply_srgb);
 }
 
 void render_spherical_harmonics(std::vector<float> sh_coefficients, int width, int height, std::string image_path)
@@ -163,6 +163,38 @@ void render_spherical_harmonics(std::vector<float> sh_coefficients, int width, i
     OIIO::ROI full_roi = OIIO::ROI(0, width, 0, height);
     out_buf.set_pixels(full_roi, OIIO::TypeDesc::FLOAT, image_pixels.data());
     out_buf.write(image_path);
+}
+
+void apply_srgb(std::string input_path, std::string output_path)
+{
+    OIIO::ImageBuf input_img(input_path);
+    OIIO::ImageSpec input_spec(input_img.spec());
+    int width = input_spec.width;
+    int height = input_spec.height;
+    int channels = input_spec.nchannels;
+
+    OIIO::ROI full_roi = OIIO::ROI(0, width, 0, height);
+    std::vector<float> pixels(width * height * channels);
+
+    input_img.get_pixels(full_roi, OIIO::TypeDesc::FLOAT, pixels.data());
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                int index = channels * (width * y + x) + c;
+                if (c < 3)
+                {
+                    pixels[index] = linear_to_srgb(pixels[index]);
+                }
+            }
+        }
+    }
+
+    OIIO::ImageBuf out_buf(OIIO::ImageSpec(width, height, channels, OIIO::TypeDesc::FLOAT));
+    out_buf.set_pixels(full_roi, OIIO::TypeDesc::FLOAT, pixels.data());
+    out_buf.write(output_path);
 }
 
 PYBIND11_MODULE(OIIO_Py2Processor, m)
@@ -176,4 +208,5 @@ PYBIND11_MODULE(OIIO_Py2Processor, m)
     m.def("denoise", &denoise);
     m.def("extract_spherical_harmonics", &extract_spherical_harmonics);
     m.def("render_spherical_harmonics", &render_spherical_harmonics);
+    m.def("apply_srgb", &apply_srgb);
 }

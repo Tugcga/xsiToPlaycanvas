@@ -5,7 +5,7 @@ from bake import bake_diffuse_indirect
 import OIIO_Py2Processor as processor
 
 
-def bake_lightmaps(app, objects, mode, bake_size_index, bake_directory, bake_extension, bake_gamma, bake_padding, bake_denoise):
+def bake_lightmaps(app, objects, mode, bake_size_index, bake_directory, bake_extension, bake_srgb, bake_padding, bake_denoise):
     if objects is None:
         objects = [v for v in app.Selection]
     else:
@@ -69,12 +69,13 @@ def bake_lightmaps(app, objects, mode, bake_size_index, bake_directory, bake_ext
                                   bake_directory,
                                   bake_extension,
                                   bake_padding,
-                                  bake_gamma,
+                                  1.0,
                                   1,
                                   "lightmap_",
                                   "lightmap_" + obj.FullName,
                                   True,
-                                  bake_denoise)
+                                  bake_denoise,
+                                  bake_srgb)
     else:
         render_steps = 1 if mode == 0 else 3
         # if mode = 1, then we use three render steps:
@@ -137,7 +138,7 @@ def bake_lightmaps(app, objects, mode, bake_size_index, bake_directory, bake_ext
                 obj = objects[obj_index]
                 out_path = bake_directory + "\\" + "lightmap_" + obj.Name + "_indirect" + "." + bake_extension
                 processor.combine_three_textures(comb_path, direct_path, env_path, out_path)  # produce a - b + c
-                processor.apply_gamma(out_path, out_path, bake_gamma)
+                processor.apply_gamma(out_path, out_path, 1.0)
                 # and also add padding for indirect map
                 processor.add_padding(out_path, out_path, bake_padding)
         for obj_index in pathes_dict.keys():

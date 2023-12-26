@@ -11,7 +11,7 @@ import OIIO_Py2Processor as processor
 math_pi = 3.1415926535
 
 
-def bake_probes(app, obj, probes_bake_size, probes_bake_gamma, probes_bake_padding, probes_bake_directory, probes_bake_extension, probes_bake_json):
+def bake_probes(app, obj, probes_bake_size, probes_bake_srgb, probes_bake_padding, probes_bake_directory, probes_bake_extension, probes_bake_json):
     # set invisible
     app.AddCyclesMesh()
     app.SetValue(obj.Name + ".CyclesMesh.ray_visibility_camera", False, "")
@@ -27,12 +27,13 @@ def bake_probes(app, obj, probes_bake_size, probes_bake_gamma, probes_bake_paddi
                           probes_bake_directory,
                           probes_bake_extension,
                           probes_bake_padding,
-                          probes_bake_gamma,
+                          1.0,
                           0,
                           "probes_",
                           probes_bake_json,
                           False,
-                          False)
+                          False,
+                          probes_bake_srgb)
     result_path = probes_bake_directory + "\\" + probes_bake_json + "." + probes_bake_extension
     # after bake images we should convert islands to SH-coefficients
     # read file with probes data

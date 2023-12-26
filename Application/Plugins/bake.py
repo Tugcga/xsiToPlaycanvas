@@ -4,7 +4,7 @@ from light_process import get_all_direct_lights
 import OIIO_Py2Processor as processor
 
 
-def bake_diffuse_indirect(app, obj, size, directory, extension, padding, gamma, uv_index, suffix, final_name, bake_combined, denoise_output):
+def bake_diffuse_indirect(app, obj, size, directory, extension, padding, gamma, uv_index, suffix, final_name, bake_combined, denoise_output, apply_srgb):
     # add bake property
     app.SelectObj(obj)
     app.AddCyclesBake()
@@ -91,6 +91,8 @@ def bake_diffuse_indirect(app, obj, size, directory, extension, padding, gamma, 
     # apply padding
     if bake_combined:
         processor.add_padding(gamma_path, result_path, padding)
+    if apply_srgb:
+        processor.apply_srgb(result_path, result_path)
     # remove unnecesery files
     # os.remove(output_pathes[0])
     # os.remove(output_pathes[1])

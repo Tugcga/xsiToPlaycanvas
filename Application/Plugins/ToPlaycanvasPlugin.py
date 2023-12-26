@@ -164,7 +164,8 @@ def BakeLightmapsProperty_Define(in_ctxt):
     o_prop.AddParameter3("bake_size", constants.siInt4, 5)
     o_prop.AddParameter3("bake_directory", constants.siString, "")
     o_prop.AddParameter3("bake_extension", constants.siString, "png")
-    o_prop.AddParameter2("bake_gamma", constants.siFloat, 2.2, 0.0, 1024.0, 1.0, 4.0, True, True)
+    # o_prop.AddParameter2("bake_gamma", constants.siFloat, 2.2, 0.0, 1024.0, 1.0, 4.0, True, True)
+    o_prop.AddParameter3("bake_srgb", constants.siBool, True)
     o_prop.AddParameter2("bake_padding", constants.siInt4, 4, 0, 1024, 0, 8, True, True)
     o_prop.AddParameter3("bake_denoise", constants.siBool, True)
 
@@ -175,7 +176,8 @@ def BakeLightmapsProperty_Define(in_ctxt):
     o_prop.AddParameter2("probe_shape_v_delta", constants.siFloat, 0.1, 0.0, 0.49, 0.05, 0.2, True, True)
     o_prop.AddParameter3("probes_bake_size", constants.siInt4, 4)
     o_prop.AddParameter2("probes_bake_padding", constants.siInt4, 4, 0, 1024, 1, 16)
-    o_prop.AddParameter2("probes_bake_gamma", constants.siFloat, 1.0, 0.0, 1024.0, 0.2, 4.0, True, True)
+    # o_prop.AddParameter2("probes_bake_gamma", constants.siFloat, 1.0, 0.0, 1024.0, 0.2, 4.0, True, True)
+    o_prop.AddParameter3("probes_bake_srgb", constants.siBool, True)
     o_prop.AddParameter3("probes_bake_directory", constants.siString, "")
     o_prop.AddParameter3("probes_bake_extension", constants.siString, "png")
     o_prop.AddParameter3("probes_bake_json", constants.siString, "probes_data")
@@ -264,7 +266,8 @@ def BakeLightmapsUI():
     oLayout.AddGroup("Bake")
     oLayout.AddEnumControl("probes_bake_size", baking_sizes, "Map Size")
     oLayout.AddItem("probes_bake_padding", "Islands Padding")
-    oLayout.AddItem("probes_bake_gamma", "Gamma")
+    # oLayout.AddItem("probes_bake_gamma", "Gamma")
+    oLayout.AddItem("probes_bake_srgb", "Apply sRGB")
     folder_path = oProp.Parameters("probes_bake_directory").Value
     if len(folder_path) == 0:
         oProp.Parameters("probes_bake_directory").Value = project_path + "\\Render_Pictures\\baked_lightmaps"
@@ -287,7 +290,8 @@ def BakeLightmapsUI():
         oProp.Parameters("bake_directory").Value = project_path + "\\Render_Pictures\\baked_lightmaps"
     oLayout.AddItem("bake_directory", "Folder", constants.siControlFolder)
     oLayout.AddEnumControl("bake_extension", baking_extensions, "Ext")
-    oLayout.AddItem("bake_gamma", "Gamma")
+    # oLayout.AddItem("bake_gamma", "Gamma")
+    oLayout.AddItem("bake_srgb", "Apply sRGB")
     oLayout.AddItem("bake_padding", "Padding")
     oLayout.AddItem("bake_denoise", "Denoise")
     oLayout.AddButton("BakeLightmap", "Bake Selection")
@@ -310,7 +314,7 @@ def BakeLightmapsProperty_BakeLightmap_OnClicked():
                           oProp.Parameters("bake_size").Value,
                           oProp.Parameters("bake_directory").Value,
                           oProp.Parameters("bake_extension").Value,
-                          oProp.Parameters("bake_gamma").Value,
+                          oProp.Parameters("bake_srgb").Value,
                           oProp.Parameters("bake_padding").Value,
                           oProp.Parameters("bake_denoise").Value)
     else:
@@ -348,7 +352,7 @@ def BakeLightmapsProperty_BakeProbes_OnClicked():
         if len(sel) == 1:
             app.BakeProbes(sel[0],
                            oProp.Parameters("probes_bake_size").Value,
-                           oProp.Parameters("probes_bake_gamma").Value,
+                           oProp.Parameters("probes_bake_srgb").Value,
                            oProp.Parameters("probes_bake_padding").Value,
                            oProp.Parameters("probes_bake_directory").Value,
                            oProp.Parameters("probes_bake_extension").Value,
@@ -480,7 +484,7 @@ def BakeLightmaps_Init(ctxt):
     args.Add("bake_size", constants.siArgumentInput, 5, constants.siInt)
     args.Add("bake_directory", constants.siArgumentInput, "", constants.siString)
     args.Add("bake_extension", constants.siArgumentInput, "", constants.siString)
-    args.Add("bake_gamma", constants.siArgumentInput, 1.0, constants.siFloat)
+    args.Add("bake_srgb", constants.siArgumentInput, True, constants.siBool)
     args.Add("bake_padding", constants.siArgumentInput, 4, constants.siInt)
     args.Add("bake_denoise", constants.siArgumentInput, True, constants.siBool)
 
@@ -495,10 +499,10 @@ def BakeLightmaps_Execute(*args):
     bake_size_index = args[2]  # in the ui enum
     bake_directory = args[3]
     bake_extension = args[4]
-    bake_gamma = args[5]
+    bake_srgb = args[5]
     bake_padding = args[6]
     bake_denoise = args[7]
-    bake_lightmaps(app, objects, mode, bake_size_index, bake_directory, bake_extension, bake_gamma, bake_padding, bake_denoise)
+    bake_lightmaps(app, objects, mode, bake_size_index, bake_directory, bake_extension, bake_srgb, bake_padding, bake_denoise)
 
     return True
 
@@ -528,7 +532,7 @@ def BakeProbes_Init(ctxt):
     args = command.Arguments
     args.Add("object")
     args.Add("probes_bake_size", constants.siArgumentInput, 4, constants.siInt)
-    args.Add("probes_bake_gamma", constants.siArgumentInput, 1.0, constants.siFloat)
+    args.Add("probes_bake_srgb", constants.siArgumentInput, True, constants.siBool)
     args.Add("probes_bake_padding", constants.siArgumentInput, 4, constants.siInt)
 
     args.Add("probes_bake_directory", constants.siArgumentInput, project_path + "\\Render_Pictures\\baked_lightmaps", constants.siString)
@@ -541,13 +545,13 @@ def BakeProbes_Init(ctxt):
 def BakeProbes_Execute(*args):
     obj = args[0]
     probes_bake_size = args[1]
-    probes_bake_gamma = args[2]
+    probes_bake_srgb = args[2]
     probes_bake_padding = args[3]
     probes_bake_directory = args[4]
     probes_bake_extension = args[5]
     probes_bake_json = args[6]
 
-    bake_probes(app, obj, probes_bake_size, probes_bake_gamma, probes_bake_padding, probes_bake_directory, probes_bake_extension, probes_bake_json)
+    bake_probes(app, obj, probes_bake_size, probes_bake_srgb, probes_bake_padding, probes_bake_directory, probes_bake_extension, probes_bake_json)
 
 
 def CreateProbes_Execute(*args):
